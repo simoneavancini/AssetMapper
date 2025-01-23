@@ -8,23 +8,24 @@ const bcrypt = require('bcrypt'); // used for password hashing
  * Register a new user
  */
 router.post('', async function(req, res) {
+    console.log(req.body.username);
     // Check email
     if (!isValidEmail(req.body.email)) {
-        return res.status(400).json({ error: 'The field "email" must be a non-empty string, in email format' });
+        return res.status(400).json({ success: false, message: 'The field "email" must be a non-empty string, in email format' });
     }
 
-    // Check if user already exists
     if (!req.body.username) {
-        return res.status(400).json({ error: 'Username can not be empty' });
+        return res.status(400).json({ success: false, message: 'Username can not be empty' });
     }
+    // Check if user already exists
     var user = await User.findOne({ username: req.body.username });
     if (user) {
-        return res.status(400).json({ error: 'Username already registered' });
+        return res.status(400).json({ success: false, message: 'Username already registered' });
     }
 
     // Check password
     if (!req.body.password || typeof req.body.password !== 'string') {
-        return res.status(400).json({ error: 'Password must be a non-empty string' });
+        return res.status(400).json({ success: false, message: 'Password must be a non-empty string' });
     }
 
     // Create new user
@@ -43,7 +44,7 @@ router.post('', async function(req, res) {
     }
 
     // Send the link of the new resource
-    res.status(201).json({ message: "user created" });
+    res.status(201).json({ success: true, message: 'User successfully created' });
 });
 
 /*
@@ -51,20 +52,20 @@ router.post('', async function(req, res) {
  */
 router.get('', async (req, res) => {
     const users = await User.find({}, '-password -__v');
-    return res.json(users);
+    return res.json({ success: true, users: users });
 });
 
 /*
  * Return user info
  */
-router.get('/:userId', async (req, res) => {
-    const user = await User.findById(req.params.userId);
+router.get('/:username', async (req, res) => {
+    const user = await User.find({ username: req.params.username });
 
     if (!user) {
         return res.status(404).json({ success: false, message: 'User not found' })
     }
 
-    return res.status(200).json(user);
+    return res.status(200).json({ success: true, user: user });
 });
 
 function isValidEmail(email) {
