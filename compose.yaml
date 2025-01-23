@@ -2,18 +2,35 @@ services:
   user_db:
     image: mongo:latest
     restart: always
-    ports:
-      - 27017:27017
+    # ports:
+    #   - 27017:27017
     volumes:
       - user_db:/data/db
+    command: mongod --quiet --logpath /dev/null
 
   user_db_adapter:
     build: ./adapter/user_db
     restart: always
     environment:
       - DB_HOST=user_db
+      - PORT=3000
     ports:
       - 3000:3000
+
+  crt_sh_adapter:
+    build: ./adapter/crt_sh
+    restart: always
+
+  authentication:
+    build: ./process_centric/authentication
+    restart: always
+    environment:
+      - DB_ADAPTER_HOST=user_db_adapter
+      - DB_ADAPTER_PORT=3000
+      - PORT=3001
+      - JWT_SECRET=438afdd0d7eb493ad328ecd6ea35ead9
+    ports:
+      - 3001:3001
 
 volumes:
   user_db:
