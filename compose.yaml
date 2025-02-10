@@ -1,36 +1,80 @@
 services:
+  # Data service
   user_db:
     image: mongo:latest
     restart: always
-    # ports:
-    #   - 27017:27017
     volumes:
       - user_db:/data/db
     command: mongod --quiet --logpath /dev/null
+  fake_crt_sh:
+    build: ./data/fake_crt_sh
+    restart: always
 
+  # Adapters
   user_db_adapter:
     build: ./adapter/user_db
     restart: always
     environment:
-      - DB_HOST=user_db
       - PORT=3000
-    ports:
-      - 3000:3000
+      - DB_HOST=user_db
 
   crt_sh_adapter:
     build: ./adapter/crt_sh
     restart: always
+    environment:
+      - CRT_SH_PROTO=http
+      - CRT_SH_HOST=fake_crt_sh
+      - CRT_SH_PORT=3000
 
+  google_search_adapter:
+    build: ./adapter/google_search
+    restart: always
+
+  dns_adapter:
+    build: ./adapter/dns
+    restart: always
+
+  ipinfo_adapter:
+    build: ./adapter/ipinfo
+    restart: always
+    environment:
+      - API_KEY=
+
+  # Business logic
+  attack_surface:
+    build: ./business_logic/attack_surface
+    restart: always
+    environment:
+      - PORT=3000
+      - CRT_SH_ADAPTER_HOST=crt_sh_adapter
+      - CRT_SH_ADAPTER_PORT=3000
+      - GOOGLE_SEARCH_ADAPTER_HOST=google_search_adapter
+      - GOOGLE_SEARCH_ADAPTER_PORT=3000
+      - DNS_ADAPTER_HOST=dns_adapter
+      - DNS_ADAPTER_PORT=3000
+      - IPINFO_ADAPTER_HOST=ipinfo_adapter
+      - IPINFO_ADAPTER_PORT=3000
+
+  # Process centric
   authentication:
     build: ./process_centric/authentication
     restart: always
     environment:
+      - PORT=3000
       - DB_ADAPTER_HOST=user_db_adapter
       - DB_ADAPTER_PORT=3000
-      - PORT=3001
       - JWT_SECRET=438afdd0d7eb493ad328ecd6ea35ead9
     ports:
-      - 3001:3001
+      - 3000:3000
+  scan:
+    build: ./process_centric/scan
+    restart: always
+    environment:
+      - PORT=3000
+      - ATTACK_SURFACE_HOST=attack_surface
+      - ATTACK_SURFACE_PORT=3000
+    ports:
+      - 3001:3000
 
 volumes:
   user_db:
