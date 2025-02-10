@@ -33,7 +33,10 @@ async def get_subdomains(target: str):
         subdomains.update(name_value.splitlines())
         subdomains.update(common_name.splitlines())
 
-    return { 'success': True, 'subdomains': list(subdomains) }
+    # Check that the subdomains are of the right target
+    true_subdomains = [sub for sub in subdomains if sub.endswith('.' + target) or sub == target]
+
+    return { 'success': True, 'subdomains': list(true_subdomains) }
 
 
 if __name__ == '__main__':
