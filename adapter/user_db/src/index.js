@@ -14,7 +14,7 @@ mongoose.connect(`mongodb://${process.env.DB_HOST}:27017/autorecon`)
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Failed to connect to MongoDB', err));
 
-app.use('/user', userRoutes);
+app.use('/users', userRoutes);
 
 app.listen(port, () => {
     console.log(`User_db adapter service running on http://localhost:${port}`);

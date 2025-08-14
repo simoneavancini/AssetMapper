@@ -1,0 +1,110 @@
+openapi: 3.0.1
+info:
+  title: autorecon
+  version: "1.0"
+servers:
+- url: http://127.0.0.1:8080/
+paths:
+  /user_db_adapter/users:
+    get:
+      tags:
+        - Adapters
+      summary: List of users
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                    email:
+                      type: string
+    post:
+      tags:
+        - Adapters
+      summary: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        "201":
+          description: User successfully created
+        "400":
+          description: Username already registered
+  /user_db_adapter/users/{username}:
+    get:
+      tags:
+        - Adapters
+      summary: User details
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+        "404":
+          description: User not found
+  /user_db_adapter/users/verify/{username}:
+    post:
+      tags:
+        - Adapters
+      summary: Verify user password
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: Successful authentication
+        "404":
+          description: User not found
+        "401":
+          description: Invalid password
+
+components:
+  schemas:
+    user:
+      title: User
+      required:
+      - email
+      - password
+      - username
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        password:
+          type: string

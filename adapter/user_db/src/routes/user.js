@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt'); // used for password hashing
  * Register a new user
  */
 router.post('', async function(req, res) {
-    console.log(req.body.username);
     // Check email
     if (!isValidEmail(req.body.email)) {
         return res.status(400).json({ success: false, message: 'The field "email" must be a non-empty string, in email format' });
@@ -51,21 +50,45 @@ router.post('', async function(req, res) {
  * Return users list
  */
 router.get('', async (req, res) => {
-    const users = await User.find({}, '-password -__v');
-    return res.json({ success: true, users: users });
+    const users = await User.find({}, '-password -__v -_id');
+    return res.json(users);
 });
 
 /*
  * Return user info
  */
 router.get('/:username', async (req, res) => {
-    const user = await User.find({ username: req.params.username });
+    const user = await User.findOne({ username: req.params.username }, '-password -__v -_id');
 
     if (!user) {
         return res.status(404).json({ success: false, message: 'User not found' })
     }
 
-    return res.status(200).json({ success: true, user: user });
+    return res.status(200).json(user);
+});
+
+/*
+ * Verify user's password
+ */
+router.post('/verify/:username', async (req, res) => {
+    const user = await User.findOne({ username: req.params.username });
+
+    if (!user) {
+		return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (!req.body.password) {
+        return res.status(400).json({ success: false, message: 'Password must be a non-empty string' });
+	}
+
+	const isValid = await bcrypt.compare(req.body.password, user.password);
+	if (isValid) {
+		return res.status(200).json({ success: true, message: 'Login successful!' });
+	} else {
+		return res.status(401).json({ success: false, message: 'Invalid password' });
+	}
+
+    return res.status(200).json(user);
 });
 
 function isValidEmail(email) {
