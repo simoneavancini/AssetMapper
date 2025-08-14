@@ -113,6 +113,33 @@ paths:
                 - subdomain.example.com
                 items:
                   type: string
+  /crt_sh_adapter/subdomains:
+    get:
+      tags:
+        - Adapters
+      summary: Find subdomains from crt.sh
+      parameters:
+      - name: target
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: test
+        in: query
+        required: false
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            '*/*':
+              schema:
+                type: array
+                example:
+                - subdomain.example.com
+                items:
+                  type: string
 
 components:
   schemas:
