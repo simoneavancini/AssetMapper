@@ -1,4 +1,4 @@
-from fastapi import Request, FastAPI
+from fastapi import Request, FastAPI, HTTPException
 import uvicorn
 import os
 import dns.resolver
@@ -11,14 +11,15 @@ resolver.nameservers = ['8.8.8.8', '8.8.4.4'] # Google Public DNS
 app = FastAPI()
 
 
-@app.post('/')
+@app.post('/resolve')
 async def resolve_domains(request: Request):
     '''
     Resolve the input domains and return their IP addresses
     '''
+
     domains = await request.json()
     if type(domains) is not list:
-        return { 'success': False, 'message': 'list of domains expected in the request body' }
+        raise HTTPException(status_code=400, detail='List of domains expected in the request body')
 
     resolved_domains = list()
     for domain in domains:
@@ -41,9 +42,9 @@ async def resolve_domains(request: Request):
                 'ips': []
             })
 
-    return { 'success': True, 'domains': resolved_domains }
+    return resolved_domains
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', default=3000))
+    port = int(os.environ.get('PORT', default=80))
     uvicorn.run('main:app', host='0.0.0.0', port=port, log_level='info')

@@ -140,6 +140,31 @@ paths:
                 - subdomain.example.com
                 items:
                   type: string
+  /dns_adapter/resolve:
+    post:
+      tags:
+        - Adapters
+      summary: Resolve the input domains and return their IP addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              example:
+              - example.com
+              - www.example.com
+              items:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resolved_domains'
+        "400":
+          description: Invalid request
 
 components:
   schemas:
