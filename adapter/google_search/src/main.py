@@ -9,7 +9,7 @@ import requests
 app = FastAPI()
 
 
-@app.get('/')
+@app.get('/subdomains')
 async def get_subdomains(target: str):
     '''
     Retrieve the list of subdomains of "target" using Google search and return them
@@ -29,11 +29,11 @@ async def get_subdomains(target: str):
                 if subdomain:
                     subdomains.add(subdomain + target)
     except requests.exceptions.HTTPError:
-        return { 'success': False, 'message': 'Received an error from the server' }
+        raise HTTPException(status_code=500, detail='HTTP Exception')
 
-    return { 'success': True, 'subdomains': list(subdomains) }
+    return list(subdomains)
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', default=3000))
+    port = int(os.environ.get('PORT', default=80))
     uvicorn.run('main:app', host='0.0.0.0', port=port, log_level='info')

@@ -91,6 +91,28 @@ paths:
           description: User not found
         "401":
           description: Invalid password
+  /google_search_adapter/subdomains:
+    get:
+      tags:
+        - Adapters
+      summary: Search subdomains on Google
+      parameters:
+      - name: target
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                example:
+                - subdomain.example.com
+                items:
+                  type: string
 
 components:
   schemas:
