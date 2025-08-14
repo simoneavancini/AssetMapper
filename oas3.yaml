@@ -165,6 +165,29 @@ paths:
                 $ref: '#/components/schemas/resolved_domains'
         "400":
           description: Invalid request
+  /ipinfo_adapter/info:
+    post:
+      tags:
+        - Adapters
+      summary: Return info about the target IPs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              example:
+              - 1.1.1.1
+              - 1.1.1.2
+              items:
+                type: string
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ips_info'
 
 components:
   schemas:
@@ -182,3 +205,38 @@ components:
           type: string
         password:
           type: string
+    resolved_domains:
+      title: Domains and IPs
+      type: array
+      items:
+        type: object
+        properties:
+          domain:
+            type: string
+          ips:
+            type: array
+            items:
+              type: string
+        example:
+          domain: example.com
+          ips:
+          - 1.1.1.1
+          - 1.1.1.2
+    ips_info:
+      title: IPs info
+      type: array
+      items:
+        required:
+        - ip
+        type: object
+        properties:
+          ip:
+            type: string
+          org:
+            type: string
+          loc:
+            type: string
+        example:
+          ip: 1.1.1.1
+          org: "AS13335 Cloudflare, Inc."
+          loc: "-27.4816,153.0175"

@@ -1,4 +1,4 @@
-from fastapi import Request, FastAPI
+from fastapi import Request, FastAPI, HTTPException
 import uvicorn
 import sys
 import os
@@ -10,14 +10,15 @@ access_token = os.environ.get('API_KEY')
 handler = ipinfo.getHandler(access_token)
 
 
-@app.post('/')
+@app.post('/info')
 async def ip_info(request: Request):
     '''
     Return info about the target IP
     '''
+
     ips = await request.json()
     if type(ips) is not list:
-        return { 'success': False, 'message': 'list of ips expected in the request body' }
+        raise HTTPException(status_code=400, detail='List of ips expected in the request body')
 
     ips_info = list()
     for ip in ips:
@@ -34,9 +35,9 @@ async def ip_info(request: Request):
                 'ip': ip
             })
 
-    return { 'success': True, 'data': ips_info }
+    return ips_info
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', default=3000))
+    port = int(os.environ.get('PORT', default=80))
     uvicorn.run('main:app', host='0.0.0.0', port=port, log_level='info')
