@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fetch = require("node-fetch");
 const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
-const bcrypt = require('bcrypt'); // used for password hashing
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /*
  * Authenticate the user and generate a new token
@@ -17,32 +17,46 @@ router.post('', async function(req, res) {
     }
 
     // Search the user
-    const response = await fetch(`http://${process.env.DB_ADAPTER_HOST}:${process.env.DB_ADAPTER_PORT}/user/${req.body.username}`);
-
-    // User not found
-    if (!response.body.success) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+    const response = await fetch(`${process.env.DB_ADAPTER_URL}/users/verify/${req.body.username}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                password: req.body.password
+            })
+        });
+    if (response.status === 401 || response.status === 404) {
+        return res.status(403).json({ success: false, message: 'Invalid username or password' });
     }
 
-    const user = response.body.user;
-
-    // Check password
-    const passwordCorrect = await bcrypt.compare(req.body.password, user.password);
-    if (!passwordCorrect) {
-        return res.status(403).json({ success: false, message: 'Wrong password' });
+    if (response.status !== 200) {
+        return res.status(500).json({ success: false, message: 'Someting went wrong' });
     }
+
+    const userdata = await fetch(`${process.env.DB_ADAPTER_URL}/users/${req.body.username}`);
+    const responseData = await userdata.json();
+    const email = responseData.email;
 
     // User authenticated -> create a token
     var payload = {
-        username: user.username,
-        email: user.email
+        username: req.body.username,
+        email: email
     }
-    var options = { expiresIn: 86400 } // expires in 24 hours
-    var token = jwt.sign(payload, process.env.JWT_SECRET, options);
+    var options = { algorithm: 'HS256', expiresIn: 86400 } // expires in 24 hours
+    try {
+        var token = jwt.sign(payload, JWT_SECRET, options);
+    } catch (error) {
+        console.error("JWT Generation Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error generating JWT token'
+        });
+    }
 
     res.json({
         success: true,
-        message: 'Enjoy your token!',
+        message: 'Token successfully generated',
         token: token
     });
 });

@@ -4,6 +4,7 @@ info:
   version: "1.0"
 servers:
 - url: http://127.0.0.1:8080/
+
 paths:
   /user_db_adapter/users:
     get:
@@ -188,6 +189,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ips_info'
+
+  /authentication/register:
+    post:
+      tags:
+        - Process centric
+      summary: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        "200":
+          description: Registration successful
+        "400":
+          description: Registration error
+  /authentication/login:
+    post:
+      tags:
+        - Process centric
+      summary: Log in
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+        required: true
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  token:
+                    type: string
+        "403":
+          description: Login error
+        "404":
+          description: User not found
+
 
 components:
   schemas:

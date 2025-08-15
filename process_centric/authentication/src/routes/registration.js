@@ -15,9 +15,12 @@ router.post('', async function(req, res) {
         return res.status(400).json({ success: false, message: 'Username can not be empty' });
     }
     // Check if user already exists
-    const userexists = await fetch(`http://${process.env.DB_ADAPTER_HOST}:${process.env.DB_ADAPTER_PORT}/user/${req.body.username}`);
-    if (userexists.body.success) {
-        return res.status(400).json({ success: false, message: 'Username already registered' });
+    const userexists = await fetch(`${process.env.DB_ADAPTER_URL}/users/${req.body.username}`);
+    if (userexists.status === 200) {
+        const userData = await userResp.json();
+        if (userData.username) {
+            return res.status(400).json({ success: false, message: 'Username already registered' });
+        }
     }
 
     // Check password
@@ -26,10 +29,10 @@ router.post('', async function(req, res) {
     }
 
     // Create new user
-    const response = await fetch(`http://${process.env.DB_ADAPTER_HOST}:${process.env.DB_ADAPTER_PORT}/user/`, {
+    const response = await fetch(`${process.env.DB_ADAPTER_URL}/users/`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json" // Specify the content type as JSON
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
             username: req.body.username,
@@ -38,11 +41,12 @@ router.post('', async function(req, res) {
         })
     });
 
-    response.json().then(data => { console.log(data) })
-    if (response.body.success) {
+    const responseData = await response.json();
+    if (responseData.success) {
         return res.json({ success: true, message: 'Registration successful' });
+    } else {
+        return res.status(500).json(responseData);
     }
-    return res.status(500).json({ success: false, message: 'Something went wrong' });
 });
 
 function isValidEmail(email) {
