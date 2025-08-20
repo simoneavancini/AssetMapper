@@ -348,9 +348,46 @@ paths:
           description: Login error
         "404":
           description: User not found
-
+  /scan/host:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Process centric
+      summary: Scan the provided host
+      parameters:
+      - name: domain
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  domain:
+                    type: string
+                  attack_surface:
+                    $ref: '#/components/schemas/attack_surface'
+                  technologies:
+                    $ref: '#/components/schemas/tech_info'
+                  employees:
+                    $ref: '#/components/schemas/email_info'
+        "401":
+          description: Missing or invalid Authorization header
+        "403":
+          description: Invalid or expired token
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     user:
       title: User
