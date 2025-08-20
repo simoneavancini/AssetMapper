@@ -209,6 +209,26 @@ paths:
                 $ref: '#/components/schemas/tech_info'
         "500":
           description: Server error
+  /hunterio_adapter/emails:
+    get:
+      tags:
+        - Adapters
+      summary: Retrieve emails found for a domain using Hunter.io
+      parameters:
+      - name: domain
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/email_info'
+        "500":
+          description: Server error
 
   /attack_surface/:
     get:
@@ -394,3 +414,13 @@ components:
           type: string
         technologies:
           type: object
+    email_info:
+      title: Email info
+      type: array
+      items:
+        type: object
+        properties:
+          value:
+            type: string
+          position:
+            type: string
