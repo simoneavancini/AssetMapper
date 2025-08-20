@@ -29,14 +29,7 @@ async def get_emails(domain: str):
     # Transform response into a short, simple summary
     emails = data.get("data", {}).get("emails", [])
 
-    emails_info = []
-    for e in emails:
-        emails_info.append({
-            "value": e.get("value"),
-            "position": e.get("position")
-        })
-
-    return emails_info
+    return emails
 
 
 if __name__ == '__main__':

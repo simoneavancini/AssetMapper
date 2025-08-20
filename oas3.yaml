@@ -226,7 +226,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/email_info'
+                type: array
+                items:
+                  type: object
         "500":
           description: Server error
 
@@ -275,6 +277,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/tech_info'
+  /employee_data/:
+    get:
+      tags:
+        - Business logic
+      summary: Emails of a given domain
+      parameters:
+      - name: domain
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/email_info'
+        "500":
+          description: Server error
 
   /authentication/register:
     post:
@@ -416,11 +438,16 @@ components:
           type: object
     email_info:
       title: Email info
-      type: array
-      items:
-        type: object
-        properties:
-          value:
-            type: string
-          position:
-            type: string
+      type: object
+      properties:
+        domain:
+          type: string
+        emails:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              position:
+                type: string

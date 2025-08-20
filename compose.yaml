@@ -81,6 +81,14 @@ services:
       - BUILTWITH_ADAPTER=http://builtwith_adapter:80
     networks:
       - internal_net
+  employee_data:
+    build: ./business_logic/employee_data
+    restart: always
+    environment:
+      - PORT=80
+      - HUNTERIO_ADAPTER=http://hunterio_adapter:80
+    networks:
+      - internal_net
 
   # Process centric
   authentication:
