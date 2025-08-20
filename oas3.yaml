@@ -189,6 +189,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ips_info'
+  /builtwith_adapter/tech:
+    get:
+      tags:
+        - Adapters
+      summary: Summary of technologies for the target domain
+      parameters:
+      - name: target
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tech_info'
+        "500":
+          description: Server error
 
   /attack_surface/:
     get:
@@ -340,3 +360,12 @@ components:
                 type: string
               loc:
                 type: string
+    tech_info:
+      title: Technologies
+      description: Number of detected technologies for each of the returned categories
+      type: object
+      properties:
+        domain:
+          type: string
+        technologies:
+          type: object
