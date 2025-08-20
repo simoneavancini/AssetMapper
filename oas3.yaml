@@ -230,6 +230,31 @@ paths:
                 $ref: '#/components/schemas/attack_surface'
         "500":
           description: Server error
+  /tech_detection/:
+    post:
+      tags:
+        - Business logic
+      summary: Technologies detected in the provided domains
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              example:
+                - example.com
+                - www.example.com
+        required: true
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/tech_info'
 
   /authentication/register:
     post:
