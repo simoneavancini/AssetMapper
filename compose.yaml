@@ -6,75 +6,124 @@ services:
     volumes:
       - user_db:/data/db
     command: mongod --quiet --logpath /dev/null
-  fake_crt_sh:
-    build: ./data/fake_crt_sh
-    restart: always
+    networks:
+      - internal_net
 
   # Adapters
   user_db_adapter:
     build: ./adapter/user_db
     restart: always
     environment:
-      - PORT=3000
+      - PORT=80
       - DB_HOST=user_db
+    networks:
+      - internal_net
 
   crt_sh_adapter:
     build: ./adapter/crt_sh
     restart: always
-    environment:
-      - CRT_SH_PROTO=http
-      - CRT_SH_HOST=fake_crt_sh
-      - CRT_SH_PORT=3000
+    networks:
+      - internal_net
 
   google_search_adapter:
     build: ./adapter/google_search
     restart: always
+    networks:
+      - internal_net
 
   dns_adapter:
     build: ./adapter/dns
     restart: always
+    networks:
+      - internal_net
 
   ipinfo_adapter:
     build: ./adapter/ipinfo
     restart: always
     environment:
-      - API_KEY=
+      - API_KEY=${IPINFO_API_KEY}
+    networks:
+      - internal_net
+
+  builtwith_adapter:
+    build: ./adapter/builtwith
+    restart: always
+    environment:
+      - API_KEY=${BUILTWITH_API_KEY}
+    networks:
+      - internal_net
+
+  hunterio_adapter:
+    build: ./adapter/hunterio
+    restart: always
+    environment:
+      - API_KEY=${HUNTERIO_API_KEY}
+    networks:
+      - internal_net
 
   # Business logic
   attack_surface:
     build: ./business_logic/attack_surface
     restart: always
     environment:
-      - PORT=3000
-      - CRT_SH_ADAPTER_HOST=crt_sh_adapter
-      - CRT_SH_ADAPTER_PORT=3000
-      - GOOGLE_SEARCH_ADAPTER_HOST=google_search_adapter
-      - GOOGLE_SEARCH_ADAPTER_PORT=3000
-      - DNS_ADAPTER_HOST=dns_adapter
-      - DNS_ADAPTER_PORT=3000
-      - IPINFO_ADAPTER_HOST=ipinfo_adapter
-      - IPINFO_ADAPTER_PORT=3000
+      - PORT=80
+      - CRT_SH_ADAPTER=http://crt_sh_adapter:80
+      - GOOGLE_SEARCH_ADAPTER=http://google_search_adapter:80
+      - DNS_ADAPTER=http://dns_adapter:80
+      - IPINFO_ADAPTER=http://ipinfo_adapter:80
+    networks:
+      - internal_net
+  tech_detection:
+    build: ./business_logic/tech_detection
+    restart: always
+    environment:
+      - PORT=80
+      - BUILTWITH_ADAPTER=http://builtwith_adapter:80
+    networks:
+      - internal_net
 
   # Process centric
   authentication:
     build: ./process_centric/authentication
     restart: always
     environment:
-      - PORT=3000
-      - DB_ADAPTER_HOST=user_db_adapter
-      - DB_ADAPTER_PORT=3000
-      - JWT_SECRET=438afdd0d7eb493ad328ecd6ea35ead9
+      - PORT=80
+      - DB_ADAPTER_URL=http://user_db_adapter
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - 3000:3000
-  scan:
-    build: ./process_centric/scan
-    restart: always
-    environment:
-      - PORT=3000
-      - ATTACK_SURFACE_HOST=attack_surface
-      - ATTACK_SURFACE_PORT=3000
+    networks:
+      - internal_net
+  # scan:
+  #   build: ./process_centric/scan
+  #   restart: always
+  #   environment:
+  #     - PORT=3000
+  #     - ATTACK_SURFACE_HOST=attack_surface
+  #     - ATTACK_SURFACE_PORT=3000
+  #     - AUTH_SERVICE_HOST=authentication
+  #     - AUTH_SERVICE_PORT=3000
+  #   ports:
+  #     - 3001:3000
+  #   depends_on:
+  #     authentication:
+  #       condition: service_healthy
+  #       restart: true
+  #   networks:
+  #     - internal_net
+
+  # Proxy used for debug purposes
+  proxy:
+    image: nginx:latest
+    volumes:
+      - ./reverse_proxy/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - 3001:3000
+      - "8080:80"
+    networks:
+      - internal_net
+
+networks:
+  internal_net:
 
 volumes:
   user_db:
