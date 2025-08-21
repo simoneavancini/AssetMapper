@@ -14,6 +14,16 @@ router.post("/scans", async (req, res) => {
   }
 });
 
+// List all
+router.get("/scans", async (req, res) => {
+  try {
+    const docs = await StoredObject.find({}, "domain createdAt");
+    res.json(docs);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Get by ID
 router.get("/scans/:id", async (req, res) => {
   try {
@@ -25,13 +35,15 @@ router.get("/scans/:id", async (req, res) => {
   }
 });
 
-// List all
-router.get("/scans", async (req, res) => {
+router.delete("/scans/:id", async (req, res) => {
   try {
-    const docs = await StoredObject.find({}, "domain createdAt");
-    res.json(docs);
+    const result = await StoredObject.findByIdAndDelete(req.params.id);
+    if (!result) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+    res.json({ success: true, message: "Object deleted", id: req.params.id });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 

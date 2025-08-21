@@ -133,6 +133,17 @@ services:
       - 3001:3000
     networks:
       - internal_net
+  scan_storage:
+    build: ./process_centric/scan_storage
+    restart: always
+    environment:
+      - PORT=80
+      - SCAN_DB_ADAPTER=http://scan_db_adapter:80
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - 3002:3000
+    networks:
+      - internal_net
 
   # Proxy used for debug purposes
   proxy:

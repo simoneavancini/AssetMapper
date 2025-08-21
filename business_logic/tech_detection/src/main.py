@@ -21,8 +21,8 @@ class BuiltwithAdapter():
         return response.json()
 
 
-@app.post('/')
-async def scan(request: Request):
+@app.get('/')
+async def scan(target: str):
     '''
     Return technologies detected in the provided domains
     '''
@@ -30,10 +30,7 @@ async def scan(request: Request):
     # Adapters
     builtwith_adapter = BuiltwithAdapter(url=os.environ.get(f'BUILTWITH_ADAPTER'))
 
-    targets = await request.json()
-    detected = list()
-    for domain in targets:
-        detected.append(builtwith_adapter.get_tech(domain))
+    detected = builtwith_adapter.get_tech(target)
 
     return detected
 

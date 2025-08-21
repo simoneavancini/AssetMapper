@@ -150,6 +150,23 @@ paths:
           description: Request error
         "404":
           description: Not found
+    delete:
+      tags:
+        - Adapters
+      summary: Delete a scan from the database
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Request error
+        "404":
+          description: Not found
   /google_search_adapter/subdomains:
     get:
       tags:
@@ -311,21 +328,16 @@ paths:
         "500":
           description: Server error
   /tech_detection/:
-    post:
+    get:
       tags:
         - Business logic
       summary: Technologies detected in the provided domains
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-              example:
-                - example.com
-                - www.example.com
+      parameters:
+      - name: target
+        in: query
         required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Successful response
@@ -430,6 +442,102 @@ paths:
           description: Missing or invalid Authorization header
         "403":
           description: Invalid or expired token
+  /scan_storage/scans:
+    get:
+      summary: List all objects
+      tags:
+        - Process centric
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of objects
+        '401':
+          description: Unauthorized (JWT missing or invalid)
+        '500':
+          description: DB adapter error
+    post:
+      summary: Store a JSON scan object
+      tags:
+        - Process centric
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/scan'
+      responses:
+        '200':
+          description: Object stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  id:
+                    type: string
+        '401':
+          description: Unauthorized (JWT missing or invalid)
+        '500':
+          description: DB adapter error
+  /scan_storage/scans/{obj_id}:
+    get:
+      summary: Retrieve a JSON scan object by ID
+      tags:
+        - Process centric
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: obj_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the object
+      responses:
+        '200':
+          description: Object retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  doc:
+                    $ref: '#/components/schemas/scan'
+        '401':
+          description: Unauthorized (JWT missing or invalid)
+        '404':
+          description: Object not found
+        '500':
+          description: DB adapter error
+    delete:
+      summary: Delete a JSON scan object
+      tags:
+        - Process centric
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: obj_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the object
+      responses:
+        '200':
+          description: Object deleted successfully
+        '401':
+          description: Unauthorized (JWT missing or invalid)
+        '404':
+          description: Object not found
+        '500':
+          description: DB adapter error
 
 components:
   securitySchemes:

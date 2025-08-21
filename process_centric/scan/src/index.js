@@ -44,11 +44,8 @@ app.get("/host", authenticateJWT, async(req, res) => {
       fetch(`${ATTACK_SURFACE}/?target=${domain}`)
             .then(r => r.json()),
 
-      fetch(`${TECH_DETECTION}/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify([ domain ]),
-      }).then(r => r.json()),
+      fetch(`${TECH_DETECTION}/?target=${domain}`)
+            .then(r => r.json()),
 
       fetch(`${EMPLOYEE_ANALYSIS}/?domain=${domain}`)
             .then(r => r.json()),
