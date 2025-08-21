@@ -9,6 +9,15 @@ services:
     networks:
       - internal_net
 
+  scan_db:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - scan_db:/data/db
+    command: mongod --quiet --logpath /dev/null
+    networks:
+      - internal_net
+
   # Adapters
   user_db_adapter:
     build: ./adapter/user_db
@@ -16,6 +25,15 @@ services:
     environment:
       - PORT=80
       - DB_HOST=user_db
+    networks:
+      - internal_net
+
+  scan_db_adapter:
+    build: ./adapter/scan_db
+    restart: always
+    environment:
+      - PORT=80
+      - DB_HOST=scan_db
     networks:
       - internal_net
 
@@ -131,3 +149,4 @@ networks:
 
 volumes:
   user_db:
+  scan_db:

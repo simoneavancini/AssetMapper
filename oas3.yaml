@@ -92,6 +92,64 @@ paths:
           description: User not found
         "401":
           description: Invalid password
+  /scan_db_adapter/scans:
+    get:
+      tags:
+        - Adapters
+      summary: List stored scans
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    domain:
+                      type: string
+                    createdAt:
+                      type: string
+    post:
+      tags:
+        - Adapters
+      summary: Post a new scan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/scan'
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+        "400":
+          description: Request error
+  /scan_db_adapter/scans/{id}:
+    get:
+      tags:
+        - Adapters
+      summary: Get scan details
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scan'
+        "400":
+          description: Request error
+        "404":
+          description: Not found
   /google_search_adapter/subdomains:
     get:
       tags:
@@ -367,16 +425,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  domain:
-                    type: string
-                  attack_surface:
-                    $ref: '#/components/schemas/attack_surface'
-                  technologies:
-                    $ref: '#/components/schemas/tech_info'
-                  employees:
-                    $ref: '#/components/schemas/email_info'
+                $ref: '#/components/schemas/scan'
         "401":
           description: Missing or invalid Authorization header
         "403":
@@ -488,3 +537,15 @@ components:
                 type: string
               position:
                 type: string
+    scan:
+      title: Scan object
+      type: object
+      properties:
+        domain:
+          type: string
+        attack_surface:
+          $ref: '#/components/schemas/attack_surface'
+        technologies:
+          $ref: '#/components/schemas/tech_info'
+        employees:
+          $ref: '#/components/schemas/email_info'
